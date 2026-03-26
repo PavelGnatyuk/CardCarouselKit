@@ -175,14 +175,17 @@ public struct CardCarouselView: View {
             if let item = centeredItem, item.cardType == .regular {
                 Text(item.title)
                     .font(.title.bold())
-                    .lineLimit(2)
-                    .multilineTextAlignment(.center)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                    .truncationMode(.tail)
 
                 if !item.subtitle.isEmpty {
                     Text(item.subtitle)
-                        .font(.title2)
+                        .font(.title3)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                        .truncationMode(.tail)
                 }
             }
         }
