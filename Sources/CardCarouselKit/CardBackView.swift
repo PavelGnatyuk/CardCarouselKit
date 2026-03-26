@@ -15,7 +15,7 @@ struct CardBackView: View {
     let item: CardItem
 
     var body: some View {
-        ZStack {
+        Group {
             if item.descriptionMarkdown.isEmpty {
                 emptyState
             } else {
@@ -23,7 +23,8 @@ struct CardBackView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
         .shadow(color: .black.opacity(0.15), radius: 10, y: 6)
         .accessibilityElement(children: .combine)
     }
@@ -41,22 +42,27 @@ struct CardBackView: View {
             if let attributed = try? AttributedString(markdown: item.descriptionMarkdown) {
                 Text(attributed)
                     .font(.body)
+                    .foregroundColor(.primary)
             } else {
                 Text(item.descriptionMarkdown)
                     .font(.body)
+                    .foregroundColor(.primary)
             }
         }
     }
 
     private var emptyState: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "text.alignleft")
-                .font(.largeTitle)
-                .foregroundStyle(.tertiary)
+        VStack(spacing: 16) {
+            Image(systemName: "pencil.line")
+                .font(.system(size: 44, weight: .light))
+                .foregroundColor(.gray)
 
-            Text(String(localized: "No description yet"))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            Text(String(localized: "Tap edit to add a description"))
+                .font(.callout)
+                .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
         }
+        .padding(.horizontal, 24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

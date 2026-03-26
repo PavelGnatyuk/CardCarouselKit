@@ -16,6 +16,7 @@ import SwiftUI
 struct CardFrontView: View {
     let item: CardItem
     var onPhotoIndexChanged: ((Int) -> Void)?
+    var onPhotoDoubleTap: (() -> Void)?
 
     @State private var currentPhotoIndex: Int = 0
 
@@ -54,6 +55,9 @@ struct CardFrontView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
+        .onTapGesture(count: 2) {
+            onPhotoDoubleTap?()
+        }
     }
 
     // MARK: - Navigation Arrows

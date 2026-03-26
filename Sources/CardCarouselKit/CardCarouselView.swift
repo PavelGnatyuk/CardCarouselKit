@@ -59,6 +59,12 @@ public struct CardCarouselView: View {
                                 onTap: { handleCardTap(slot) },
                                 onPhotoIndexChanged: { photoIndex in
                                     state.currentPhotoIndex = photoIndex
+                                },
+                                onPhotoDoubleTap: {
+                                    dataSource?.carouselDidTapPhoto(
+                                        card: slot.item,
+                                        photoIndex: state.currentPhotoIndex
+                                    )
                                 }
                             )
                             .frame(width: layout.cardWidth, height: layout.cardHeight)

@@ -18,29 +18,35 @@ struct CardView: View {
     let isCentered: Bool
     let onTap: () -> Void
     var onPhotoIndexChanged: ((Int) -> Void)?
+    var onPhotoDoubleTap: (() -> Void)?
 
     var body: some View {
-        ZStack {
-            CardFrontView(
-                item: item,
-                onPhotoIndexChanged: isCentered ? onPhotoIndexChanged : nil
-            )
-            .opacity(isFlipped ? 0 : 1)
-            .allowsHitTesting(!isFlipped)
-            .rotation3DEffect(
-                .degrees(isFlipped ? 180 : 0),
-                axis: (x: 0, y: 1, z: 0),
-                perspective: 0.5
-            )
-
-            CardBackView(item: item)
-                .opacity(isFlipped ? 1 : 0)
-                .allowsHitTesting(isFlipped)
+        GeometryReader { geometry in
+            ZStack {
+                CardFrontView(
+                    item: item,
+                    onPhotoIndexChanged: isCentered ? onPhotoIndexChanged : nil,
+                    onPhotoDoubleTap: isCentered ? onPhotoDoubleTap : nil
+                )
+                .frame(width: geometry.size.width, height: geometry.size.height)
+                .opacity(isFlipped ? 0 : 1)
+                .allowsHitTesting(!isFlipped)
                 .rotation3DEffect(
-                    .degrees(isFlipped ? 0 : -180),
+                    .degrees(isFlipped ? 180 : 0),
                     axis: (x: 0, y: 1, z: 0),
                     perspective: 0.5
                 )
+
+                CardBackView(item: item)
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                    .opacity(isFlipped ? 1 : 0)
+                    .allowsHitTesting(isFlipped)
+                    .rotation3DEffect(
+                        .degrees(isFlipped ? 0 : -180),
+                        axis: (x: 0, y: 1, z: 0),
+                        perspective: 0.5
+                    )
+            }
         }
         .animation(.spring(duration: 0.6, bounce: 0.15), value: isFlipped)
         .onTapGesture {
