@@ -16,5 +16,31 @@ public final class CardCarouselState {
     public var isShimmerActive: Bool = false
     public var centeredCard: CardItem?
 
+    // MARK: - Flip State (per carousel position, not per card ID)
+
+    private var flippedPositions: Set<Int> = []
+
+    public func isFlipped(at position: Int) -> Bool {
+        flippedPositions.contains(position)
+    }
+
+    public func toggleFlip(at position: Int) {
+        if flippedPositions.contains(position) {
+            flippedPositions.remove(position)
+        } else {
+            flippedPositions.insert(position)
+        }
+    }
+
+    public func resetFlip(at position: Int) {
+        flippedPositions.remove(position)
+    }
+
+    /// Resets flip state for all positions outside the visible window.
+    public func resetFlipsOutsideWindow(center: Int, windowSize: Int = 1) {
+        let visible = (center - windowSize)...(center + windowSize)
+        flippedPositions = flippedPositions.filter { visible.contains($0) }
+    }
+
     public init() {}
 }

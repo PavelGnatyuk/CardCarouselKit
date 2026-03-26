@@ -7,25 +7,21 @@
 
 import SwiftUI
 
-/// Computes card dimensions and visible card count from available space and size classes.
+/// Computes card dimensions from available space and size classes.
 ///
-/// Layout contexts per device/orientation:
-/// - iPhone Portrait  (compact H, regular V):  3 cards, 75% height
-/// - iPhone Landscape (compact H, compact V):  3 cards, 85% height
-/// - iPad Portrait    (regular H, regular V):  5 cards, 65% height, max 320pt width
-/// - iPad Landscape   (regular H, regular V):  5 cards, 80% height, max 320pt width
+/// The card is always centered within the full container width.
+/// Neighboring cards peek in the margins.
+/// Aspect ratio is always 3:4 (width:height).
 struct CardCarouselLayout {
     let cardHeight: CGFloat
     let cardWidth: CGFloat
-    let visibleCardCount: Int
+
+    /// Gap between adjacent cards in the carousel.
     let interCardSpacing: CGFloat
 
-    /// Creates a layout from the available container size and current size classes.
-    ///
-    /// - Parameters:
-    ///   - containerSize: Available size from GeometryReader.
-    ///   - horizontalSizeClass: Current horizontal size class.
-    ///   - verticalSizeClass: Current vertical size class.
+    /// Horizontal content margin so the first/last card centers in the viewport.
+    let horizontalContentMargin: CGFloat
+
     init(
         containerSize: CGSize,
         horizontalSizeClass: UserInterfaceSizeClass?,
@@ -35,22 +31,19 @@ struct CardCarouselLayout {
         let isCompactHeight = verticalSizeClass == .compact
 
         if isRegularWidth {
-            // iPad — distinguish portrait vs landscape by container aspect ratio
+            // iPad
             let isLandscape = containerSize.width > containerSize.height
             let heightFraction: CGFloat = isLandscape ? 0.80 : 0.65
-            let maxWidth: CGFloat = 320
-
             let resolved = Self.resolveCardSize(
                 containerSize: containerSize,
                 heightFraction: heightFraction,
-                maxWidth: maxWidth
+                maxWidth: min(320, containerSize.width * 0.45)
             )
             self.cardWidth = resolved.width
             self.cardHeight = resolved.height
-            self.visibleCardCount = 5
-            self.interCardSpacing = 16
+            self.interCardSpacing = 0
         } else if isCompactHeight {
-            // iPhone Landscape — cards are wide relative to short screen
+            // iPhone Landscape
             let resolved = Self.resolveCardSize(
                 containerSize: containerSize,
                 heightFraction: 0.85,
@@ -58,20 +51,20 @@ struct CardCarouselLayout {
             )
             self.cardWidth = resolved.width
             self.cardHeight = resolved.height
-            self.visibleCardCount = 3
-            self.interCardSpacing = 12
+            self.interCardSpacing = 0
         } else {
-            // iPhone Portrait — clamp width so side cards peek through
+            // iPhone Portrait — card takes ~85% of width, margins show neighbor peeks
             let resolved = Self.resolveCardSize(
                 containerSize: containerSize,
                 heightFraction: 0.75,
-                maxWidth: containerSize.width * 0.75
+                maxWidth: containerSize.width * 0.85
             )
             self.cardWidth = resolved.width
             self.cardHeight = resolved.height
-            self.visibleCardCount = 3
-            self.interCardSpacing = 12
+            self.interCardSpacing = 0
         }
+
+        self.horizontalContentMargin = (containerSize.width - cardWidth) / 2
     }
 
     /// Computes card size from height fraction, clamping width to maxWidth
@@ -85,7 +78,6 @@ struct CardCarouselLayout {
         let computedWidth = computedHeight * 3.0 / 4.0
 
         if computedWidth > maxWidth {
-            // Width exceeds limit — clamp and derive height from clamped width
             return CGSize(width: maxWidth, height: maxWidth * 4.0 / 3.0)
         }
         return CGSize(width: computedWidth, height: computedHeight)
