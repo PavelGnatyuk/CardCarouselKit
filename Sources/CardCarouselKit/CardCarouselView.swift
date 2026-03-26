@@ -20,6 +20,8 @@ public struct CardCarouselView: View {
     @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     @State private var scrolledID: UUID?
+    @State private var isRepositioning = false
+    @State private var slots: [VirtualSlot] = []
 
     public init(
         state: CardCarouselState,
@@ -45,14 +47,16 @@ public struct CardCarouselView: View {
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: layout.interCardSpacing) {
-                        ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                            let isCentered = item.id == scrolledID || (scrolledID == nil && index == 0)
+                        ForEach(slots) { slot in
+                            let isCentered = slot.id == scrolledID
+                                || (scrolledID == nil && slot.realIndex == 0)
 
                             CardView(
-                                item: item,
-                                isFlipped: item.cardType == .regular && state.isFlipped(at: index),
+                                item: slot.item,
+                                isFlipped: slot.item.cardType == .regular
+                                    && state.isFlipped(at: slot.realIndex),
                                 isCentered: isCentered,
-                                onTap: { handleCardTap(item, at: index) },
+                                onTap: { handleCardTap(slot) },
                                 onPhotoIndexChanged: { photoIndex in
                                     state.currentPhotoIndex = photoIndex
                                 }
@@ -65,7 +69,7 @@ public struct CardCarouselView: View {
                             .offset(y: isCentered ? 0 : 8)
                             .zIndex(isCentered ? 1 : 0)
                             .animation(.easeInOut(duration: 0.25), value: scrolledID)
-                            .id(item.id)
+                            .id(slot.id)
                         }
                     }
                     .scrollTargetLayout()
@@ -78,26 +82,90 @@ public struct CardCarouselView: View {
             .padding(.top, 20)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
+        .onChange(of: items.count) { _, _ in
+            rebuildSlots()
+        }
         .onChange(of: scrolledID) { _, newID in
-            guard let newID else { return }
-            if let index = items.firstIndex(where: { $0.id == newID }) {
-                state.currentCardIndex = index
-                state.centeredCard = items[index]
-                state.resetFlipsOutsideWindow(center: index)
-            }
+            handleScrollChange(newID: newID)
         }
         .onAppear {
-            if scrolledID == nil, let first = items.first {
-                scrolledID = first.id
-                state.centeredCard = first
-                state.currentCardIndex = 0
-            }
+            rebuildSlots()
         }
     }
 
+    // MARK: - Slots
+
+    private func rebuildSlots() {
+        slots = CardCarouselLoop.build(from: items)
+        guard !slots.isEmpty else { return }
+
+        let initialIndex = items.count >= 2 ? CardCarouselLoop.firstRealIndex : 0
+        scrolledID = slots[initialIndex].id
+        state.centeredCard = slots[initialIndex].item
+        state.currentCardIndex = slots[initialIndex].realIndex
+    }
+
+    // MARK: - Scroll Handling
+
+    private func handleScrollChange(newID: UUID?) {
+        guard let newID else { return }
+
+        // After programmatic repositioning, just update state and reset flag
+        if isRepositioning {
+            isRepositioning = false
+            if let slot = slots.first(where: { $0.id == newID }) {
+                state.currentCardIndex = slot.realIndex
+                state.centeredCard = slot.item
+                state.resetFlipsOutsideWindow(center: slot.realIndex)
+            }
+            return
+        }
+
+        guard let virtualIndex = slots.firstIndex(where: { $0.id == newID }) else { return }
+        let slot = slots[virtualIndex]
+
+        // Check if we're in a buffer zone and need to reposition
+        if items.count >= 2 {
+            let needsReposition: Bool
+            if CardCarouselLoop.isInLeadingBuffer(virtualIndex: virtualIndex) {
+                needsReposition = true
+            } else if CardCarouselLoop.isInTrailingBuffer(virtualIndex: virtualIndex, itemCount: items.count) {
+                needsReposition = true
+            } else {
+                needsReposition = false
+            }
+
+            if needsReposition {
+                let targetIndex = CardCarouselLoop.matchingRealSlotIndex(
+                    virtualIndex: virtualIndex,
+                    itemCount: items.count
+                )
+                // Update state immediately so title shows correct card
+                state.currentCardIndex = slot.realIndex
+                state.centeredCard = slot.item
+                // Delay repositioning so the buffer card fully settles,
+                // then jump instantly (no animation) to the matching real slot
+                isRepositioning = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    withAnimation(.none) {
+                        scrolledID = slots[targetIndex].id
+                    }
+                }
+                return
+            }
+        }
+
+        // Normal scroll — update state
+        state.currentCardIndex = slot.realIndex
+        state.centeredCard = slot.item
+        state.resetFlipsOutsideWindow(center: slot.realIndex)
+    }
+
+    // MARK: - Title
+
     private var centeredItem: CardItem? {
         if let scrolledID {
-            return items.first { $0.id == scrolledID }
+            return slots.first { $0.id == scrolledID }?.item
         }
         return items.first
     }
@@ -122,12 +190,14 @@ public struct CardCarouselView: View {
         .animation(.easeInOut(duration: 0.25), value: scrolledID)
     }
 
-    private func handleCardTap(_ item: CardItem, at index: Int) {
-        switch item.cardType {
+    // MARK: - Card Tap
+
+    private func handleCardTap(_ slot: VirtualSlot) {
+        switch slot.item.cardType {
         case .special:
-            dataSource?.carouselDidTapSpecialCard(item)
+            dataSource?.carouselDidTapSpecialCard(slot.item)
         case .regular:
-            state.toggleFlip(at: index)
+            state.toggleFlip(at: slot.realIndex)
         }
     }
 }
