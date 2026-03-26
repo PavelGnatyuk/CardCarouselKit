@@ -44,6 +44,8 @@ public struct CardCarouselView: View {
             VStack(spacing: 16) {
                 cardTitle
                     .frame(height: 60, alignment: .bottom)
+                    .opacity(state.isZoomTransitionActive ? 0 : 1)
+                    .animation(.easeInOut(duration: 0.3), value: state.isZoomTransitionActive)
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: layout.interCardSpacing) {
@@ -74,6 +76,15 @@ public struct CardCarouselView: View {
                             .blur(radius: isCentered ? 0 : 2)
                             .offset(y: isCentered ? 0 : 8)
                             .zIndex(isCentered ? 1 : 0)
+                            .background(
+                                GeometryReader { proxy in
+                                    Color.clear
+                                        .preference(
+                                            key: CardFramePreferenceKey.self,
+                                            value: isCentered ? proxy.frame(in: .global) : .zero
+                                        )
+                                }
+                            )
                             .animation(.easeInOut(duration: 0.25), value: scrolledID)
                             .id(slot.id)
                         }

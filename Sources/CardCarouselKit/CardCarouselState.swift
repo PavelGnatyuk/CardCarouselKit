@@ -16,6 +16,9 @@ public final class CardCarouselState {
     public var isShimmerActive: Bool = false
     public var centeredCard: CardItem?
 
+    /// Set by the host app to fade the carousel title during zoom transitions.
+    public var isZoomTransitionActive: Bool = false
+
     // MARK: - Flip State (per carousel position, not per card ID)
 
     private var flippedPositions: Set<Int> = []
