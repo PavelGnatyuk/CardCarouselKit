@@ -10,15 +10,16 @@ import SwiftUI
 /// Flip container combining front and back card faces with 3D Y-axis rotation.
 ///
 /// The front face shows the photo (CardFrontView).
-/// The back face shows the description (CardBackView).
+/// The back face is provided by `backContent` — defaults to `CardBackView`.
 /// Tap triggers `onTap` — the host decides whether to flip or handle differently.
-struct CardView: View {
+struct CardView<BackContent: View>: View {
     let item: CardItem
     let isFlipped: Bool
     let isCentered: Bool
     let onTap: () -> Void
     var onPhotoIndexChanged: ((Int) -> Void)?
     var onPhotoDoubleTap: (() -> Void)?
+    @ViewBuilder let backContent: () -> BackContent
 
     var body: some View {
         GeometryReader { geometry in
@@ -37,7 +38,7 @@ struct CardView: View {
                     perspective: 0.5
                 )
 
-                CardBackView(item: item)
+                backContent()
                     .frame(width: geometry.size.width, height: geometry.size.height)
                     .opacity(isFlipped ? 1 : 0)
                     .allowsHitTesting(isFlipped)

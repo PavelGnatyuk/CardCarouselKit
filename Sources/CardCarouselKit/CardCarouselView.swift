@@ -11,10 +11,14 @@ import SwiftUI
 ///
 /// Each card is centered within a full-width page. Neighboring cards peek
 /// in the margins. Swipe snaps one card at a time.
-public struct CardCarouselView: View {
+///
+/// Pass a `backContent` closure to customize the card back face.
+/// When omitted, the default `CardBackView` (markdown description) is used.
+public struct CardCarouselView<BackContent: View>: View {
     let state: CardCarouselState
     let dataSource: (any CardCarouselDataSource)?
     let items: [CardItem]
+    @ViewBuilder let backContent: @MainActor (CardItem) -> BackContent
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.verticalSizeClass) private var verticalSizeClass
@@ -26,11 +30,13 @@ public struct CardCarouselView: View {
     public init(
         state: CardCarouselState,
         dataSource: (any CardCarouselDataSource)? = nil,
-        items: [CardItem] = []
+        items: [CardItem] = [],
+        @ViewBuilder backContent: @escaping @MainActor (CardItem) -> BackContent
     ) {
         self.state = state
         self.dataSource = dataSource
         self.items = items
+        self.backContent = backContent
     }
 
     public var body: some View {
@@ -67,7 +73,8 @@ public struct CardCarouselView: View {
                                         card: slot.item,
                                         photoIndex: state.currentPhotoIndex
                                     )
-                                }
+                                },
+                                backContent: { backContent(slot.item) }
                             )
                             .frame(width: layout.cardWidth, height: layout.cardHeight)
                             .clipped()
@@ -219,6 +226,22 @@ public struct CardCarouselView: View {
         case .regular:
             state.toggleFlip(at: slot.realIndex)
         }
+    }
+}
+
+// MARK: - Default Back Face Convenience Init
+
+extension CardCarouselView where BackContent == CardBackView {
+    /// Creates a carousel with the default back face (markdown description).
+    public init(
+        state: CardCarouselState,
+        dataSource: (any CardCarouselDataSource)? = nil,
+        items: [CardItem] = []
+    ) {
+        self.state = state
+        self.dataSource = dataSource
+        self.items = items
+        self.backContent = { item in CardBackView(item: item) }
     }
 }
 

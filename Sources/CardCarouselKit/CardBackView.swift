@@ -11,10 +11,14 @@ import SwiftUI
 ///
 /// Domain-agnostic: knows nothing about wine.
 /// Parent view controls dimensions — this view fills its proposed size.
-struct CardBackView: View {
+public struct CardBackView: View {
     let item: CardItem
 
-    var body: some View {
+    public init(item: CardItem) {
+        self.item = item
+    }
+
+    public var body: some View {
         Group {
             if item.descriptionMarkdown.isEmpty {
                 emptyState
