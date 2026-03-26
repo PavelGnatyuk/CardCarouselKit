@@ -64,7 +64,7 @@ public struct CardCarouselView: View {
                             .frame(width: layout.cardWidth, height: layout.cardHeight)
                             .clipped()
                             .opacity(isCentered ? 1.0 : 0.5)
-                            .scaleEffect(isCentered ? 1.0 : 0.92)
+                            .scaleEffect(isCentered ? 1.0 : 0.94)
                             .blur(radius: isCentered ? 0 : 2)
                             .offset(y: isCentered ? 0 : 8)
                             .zIndex(isCentered ? 1 : 0)
