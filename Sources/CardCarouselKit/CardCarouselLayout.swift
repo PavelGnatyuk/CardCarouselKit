@@ -27,6 +27,9 @@ struct CardCarouselLayout {
     /// Horizontal content margin so the first/last card centers in the viewport.
     let horizontalContentMargin: CGFloat
 
+    /// Whether the device is in landscape orientation (compact height).
+    let isLandscape: Bool
+
     init(
         containerSize: CGSize,
         horizontalSizeClass: UserInterfaceSizeClass?,
@@ -34,6 +37,7 @@ struct CardCarouselLayout {
     ) {
         let isRegularWidth = horizontalSizeClass == .regular
         let isCompactHeight = verticalSizeClass == .compact
+        self.isLandscape = isCompactHeight
 
         if isRegularWidth {
             // iPad — both portrait and landscape
@@ -59,7 +63,7 @@ struct CardCarouselLayout {
             let gap: CGFloat = 16
             let computedHeight = containerSize.height - toolbarHeight - toolbarPadding - gap
             let computedWidth = computedHeight * 3.0 / 4.0
-            let maxWidth = containerSize.width * 0.45
+            let maxWidth = containerSize.width * 0.30
 
             if computedWidth > maxWidth {
                 self.cardWidth = maxWidth
