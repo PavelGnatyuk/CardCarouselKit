@@ -42,18 +42,6 @@ struct CardView<BackContent: View>: View {
                 axis: (x: 0, y: 1, z: 0),
                 perspective: 0.5
             )
-            // DIAGNOSTIC — remove after confirming frame stability
-            .background(
-                GeometryReader { geo in
-                    Color.clear.onAppear {
-                        print("PHOTO FRAME: \(geo.size.width) x \(geo.size.height) | isCentered: \(isCentered)")
-                    }
-                    .onChange(of: geo.size) { _, newSize in
-                        print("PHOTO FRAME CHANGED TO: \(newSize.width) x \(newSize.height) | isCentered: \(isCentered)")
-                    }
-                }
-            )
-
             backContent()
                 .frame(width: cardSize.width, height: cardSize.height)
                 .opacity(isFlipped ? 1 : 0)
