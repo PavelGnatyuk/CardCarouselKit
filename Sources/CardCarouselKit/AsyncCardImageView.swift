@@ -8,14 +8,26 @@
 import SwiftUI
 import UIKit
 
+/// In-memory image cache shared across all card image views.
+/// Survives LazyHStack view recycling so images don't reload from disk.
+private nonisolated(unsafe) let imageCache = NSCache<NSString, UIImage>()
+
 /// Asynchronously loads and displays a card photo.
 ///
-/// Uses a managed `.task` modifier that auto-cancels when the view disappears.
-/// Shows a placeholder rectangle while the image is loading.
+/// On first load, fetches the image from disk and caches it.
+/// On subsequent displays (after LazyHStack recycling), the cached image
+/// is set in the initializer so it's available on the very first render frame —
+/// no placeholder flash, no delayed resize.
 struct AsyncCardImageView: View {
     let photo: CardPhoto
 
     @State private var image: UIImage?
+
+    init(photo: CardPhoto) {
+        self.photo = photo
+        let key = photo.id.uuidString as NSString
+        _image = State(initialValue: imageCache.object(forKey: key))
+    }
 
     var body: some View {
         Group {
@@ -23,13 +35,23 @@ struct AsyncCardImageView: View {
                 Image(uiImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
+                    .transition(.identity)
             } else {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(.quaternary)
+                    .transition(.identity)
             }
         }
         .task(id: photo.id) {
-            image = await photo.cardSizeImageProvider()
+            // Already have the image from cache (set in init)
+            if image != nil { return }
+
+            let loaded = await photo.cardSizeImageProvider()
+            if let loaded {
+                let key = photo.id.uuidString as NSString
+                imageCache.setObject(loaded, forKey: key)
+            }
+            image = loaded
         }
     }
 }

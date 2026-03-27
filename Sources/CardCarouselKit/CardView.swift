@@ -12,6 +12,10 @@ import SwiftUI
 /// The front face shows the photo (CardFrontView).
 /// The back face is provided by `backContent` — defaults to `CardBackView`.
 /// Tap triggers `onTap` — the host decides whether to flip or handle differently.
+///
+/// The container applies a single clipShape, material background, and shadow.
+/// `.compositingGroup()` ensures the shadow composites correctly and prevents
+/// artifacts when used with `.scrollClipDisabled()`.
 struct CardView<BackContent: View>: View {
     let item: CardItem
     let isFlipped: Bool
@@ -48,6 +52,8 @@ struct CardView<BackContent: View>: View {
                         perspective: 0.5
                     )
             }
+            .background(.regularMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
         .animation(.spring(duration: 0.6, bounce: 0.15), value: isFlipped)
         .onTapGesture {

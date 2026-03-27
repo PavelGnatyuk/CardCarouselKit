@@ -47,60 +47,61 @@ public struct CardCarouselView<BackContent: View>: View {
                 verticalSizeClass: verticalSizeClass
             )
 
-            VStack(spacing: 0) {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    LazyHStack(spacing: layout.interCardSpacing) {
-                        ForEach(slots) { slot in
-                            let isCentered = slot.id == scrolledID
-                                || (scrolledID == nil && slot.realIndex == 0)
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(spacing: layout.interCardSpacing) {
+                    ForEach(slots) { slot in
+                        let isCentered = slot.id == scrolledID
+                            || (scrolledID == nil && slot.realIndex == 0)
 
-                            CardView(
-                                item: slot.item,
-                                isFlipped: slot.item.cardType == .regular
-                                    && state.isFlipped(at: slot.realIndex),
-                                isCentered: isCentered,
-                                onTap: { handleCardTap(slot) },
-                                onPhotoIndexChanged: { photoIndex in
-                                    state.currentPhotoIndex = photoIndex
-                                },
-                                onPhotoDoubleTap: {
-                                    dataSource?.carouselDidTapPhoto(
-                                        card: slot.item,
-                                        photoIndex: state.currentPhotoIndex
+                        CardView(
+                            item: slot.item,
+                            isFlipped: slot.item.cardType == .regular
+                                && state.isFlipped(at: slot.realIndex),
+                            isCentered: isCentered,
+                            onTap: { handleCardTap(slot) },
+                            onPhotoIndexChanged: { photoIndex in
+                                state.currentPhotoIndex = photoIndex
+                            },
+                            onPhotoDoubleTap: {
+                                dataSource?.carouselDidTapPhoto(
+                                    card: slot.item,
+                                    photoIndex: state.currentPhotoIndex
+                                )
+                            },
+                            backContent: { backContent(slot.item) }
+                        )
+                        .frame(width: layout.cardWidth, height: layout.cardHeight)
+                        .shadow(
+                            color: isCentered ? .black.opacity(0.18) : .clear,
+                            radius: 16, x: 0, y: 8
+                        )
+                        .opacity(isCentered ? 1.0 : 0.6)
+                        .scaleEffect(isCentered ? 1.0 : 0.88)
+                        .offset(y: isCentered ? 0 : 8)
+                        .zIndex(isCentered ? 1 : 0)
+                        .background(
+                            GeometryReader { proxy in
+                                Color.clear
+                                    .preference(
+                                        key: CardFramePreferenceKey.self,
+                                        value: isCentered ? proxy.frame(in: .global) : .zero
                                     )
-                                },
-                                backContent: { backContent(slot.item) }
-                            )
-                            .frame(width: layout.cardWidth, height: layout.cardHeight)
-                            .clipped()
-                            .opacity(isCentered ? 1.0 : 0.5)
-                            .scaleEffect(isCentered ? 1.0 : 0.94)
-                            .blur(radius: isCentered ? 0 : 2)
-                            .offset(y: isCentered ? 0 : 8)
-                            .zIndex(isCentered ? 1 : 0)
-                            .background(
-                                GeometryReader { proxy in
-                                    Color.clear
-                                        .preference(
-                                            key: CardFramePreferenceKey.self,
-                                            value: isCentered ? proxy.frame(in: .global) : .zero
-                                        )
-                                }
-                            )
-                            .animation(.easeInOut(duration: 0.25), value: scrolledID)
-                            .id(slot.id)
-                        }
+                            }
+                        )
+                        .animation(.easeInOut(duration: 0.25), value: scrolledID)
+                        .id(slot.id)
                     }
-                    .scrollTargetLayout()
                 }
-                .scrollTargetBehavior(.viewAligned)
-                .scrollPosition(id: $scrolledID)
-                .contentMargins(.horizontal, layout.horizontalContentMargin, for: .scrollContent)
-                .frame(height: layout.cardHeight)
+                .scrollTargetLayout()
             }
-            .padding(.top, 20)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .scrollTargetBehavior(.viewAligned)
+            .scrollClipDisabled()
+            .scrollPosition(id: $scrolledID)
+            .contentMargins(.horizontal, layout.horizontalContentMargin, for: .scrollContent)
+            .frame(height: layout.cardHeight)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .contentShape(Rectangle())
         .onChange(of: items.count) { _, _ in
             rebuildSlots()
         }

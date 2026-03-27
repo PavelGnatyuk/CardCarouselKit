@@ -9,8 +9,9 @@ import SwiftUI
 
 /// Renders the front face of a single carousel card.
 ///
-/// Photo fills the entire card surface. Title and subtitle overlay the bottom
-/// with a gradient for legibility — no separate text panel.
+/// Photo fills the entire card surface.
+/// Nameplate (title/subtitle) is rendered by the host app as an overlay
+/// outside CardCarouselKit, using the card frame preference key.
 /// Supports multi-photo navigation with left/right arrow overlays.
 /// Parent view controls dimensions — this view fills its proposed size.
 struct CardFrontView: View {
@@ -21,18 +22,13 @@ struct CardFrontView: View {
     @State private var currentPhotoIndex: Int = 0
 
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
+        ZStack {
             photoArea
-            if item.cardType == .regular {
-                nameplate
-            }
             if hasMultiplePhotos {
                 photoNavigationArrows
                 photoCounter
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.15), radius: 10, y: 6)
         .accessibilityElement(children: .combine)
         .onChange(of: item.id) { _, _ in
             currentPhotoIndex = 0
@@ -50,14 +46,14 @@ struct CardFrontView: View {
             if let photo = currentPhoto {
                 AsyncCardImageView(photo: photo)
                     .id(photo.id)
-                    .transition(.opacity.animation(.easeInOut(duration: 0.25)))
+                    .transition(.identity)
             } else {
                 Rectangle()
                     .fill(.quaternary)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .clipped()
+        .contentShape(Rectangle())
         .onTapGesture(count: 2) {
             onPhotoDoubleTap?()
         }
@@ -72,7 +68,7 @@ struct CardFrontView: View {
             arrowButton(direction: .right)
         }
         .padding(.horizontal, 6)
-        .padding(.bottom, 50)
+        .padding(.bottom, 80)
     }
 
     private func arrowButton(direction: ArrowDirection) -> some View {
@@ -113,33 +109,6 @@ struct CardFrontView: View {
             .background(.black.opacity(0.3), in: Capsule())
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
             .padding(8)
-    }
-
-    // MARK: - Nameplate
-
-    private var nameplate: some View {
-        VStack(spacing: 2) {
-            Text(item.title)
-                .font(.headline)
-                .fontWeight(.bold)
-                .foregroundStyle(.white)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-
-            if !item.subtitle.isEmpty {
-                Text(item.subtitle)
-                    .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.8))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-            }
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .frame(maxWidth: .infinity)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
-        .padding(.horizontal, 8)
-        .padding(.bottom, 8)
     }
 
     // MARK: - Helpers
