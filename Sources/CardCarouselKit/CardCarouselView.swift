@@ -47,12 +47,7 @@ public struct CardCarouselView<BackContent: View>: View {
                 verticalSizeClass: verticalSizeClass
             )
 
-            VStack(spacing: 16) {
-                cardTitle
-                    .frame(height: 60, alignment: .bottom)
-                    .opacity(state.isZoomTransitionActive ? 0 : 1)
-                    .animation(.easeInOut(duration: 0.3), value: state.isZoomTransitionActive)
-
+            VStack(spacing: 0) {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: layout.interCardSpacing) {
                         ForEach(slots) { slot in
@@ -183,38 +178,6 @@ public struct CardCarouselView<BackContent: View>: View {
         state.currentCardIndex = slot.realIndex
         state.centeredCard = slot.item
         state.resetFlipsOutsideWindow(center: slot.realIndex)
-    }
-
-    // MARK: - Title
-
-    private var centeredItem: CardItem? {
-        if let scrolledID {
-            return slots.first { $0.id == scrolledID }?.item
-        }
-        return items.first
-    }
-
-    private var cardTitle: some View {
-        VStack(spacing: 2) {
-            if let item = centeredItem, item.cardType == .regular {
-                Text(item.title)
-                    .font(.title.bold())
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-                    .truncationMode(.tail)
-
-                if !item.subtitle.isEmpty {
-                    Text(item.subtitle)
-                        .font(.title3)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
-                        .truncationMode(.tail)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .animation(.easeInOut(duration: 0.25), value: scrolledID)
     }
 
     // MARK: - Card Tap

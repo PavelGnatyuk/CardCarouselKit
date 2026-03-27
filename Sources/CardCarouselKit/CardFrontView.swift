@@ -23,6 +23,9 @@ struct CardFrontView: View {
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             photoArea
+            if item.cardType == .regular {
+                nameplate
+            }
             if hasMultiplePhotos {
                 photoNavigationArrows
                 photoCounter
@@ -110,6 +113,33 @@ struct CardFrontView: View {
             .background(.black.opacity(0.3), in: Capsule())
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
             .padding(8)
+    }
+
+    // MARK: - Nameplate
+
+    private var nameplate: some View {
+        VStack(spacing: 2) {
+            Text(item.title)
+                .font(.headline)
+                .fontWeight(.bold)
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+            if !item.subtitle.isEmpty {
+                Text(item.subtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.8))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, 8)
+        .padding(.bottom, 8)
     }
 
     // MARK: - Helpers
