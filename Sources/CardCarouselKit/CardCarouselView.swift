@@ -73,7 +73,7 @@ public struct CardCarouselView<BackContent: View>: View {
                         )
                         .frame(width: layout.cardWidth, height: layout.cardHeight)
                         .opacity(isCentered ? 1.0 : 0.6)
-                        .scaleEffect(isCentered ? 1.0 : 0.97)
+                        .scaleEffect(isCentered ? 1.0 : 0.97, anchor: .bottom)
                         .zIndex(isCentered ? 1 : 0)
                         .background(
                             GeometryReader { proxy in
