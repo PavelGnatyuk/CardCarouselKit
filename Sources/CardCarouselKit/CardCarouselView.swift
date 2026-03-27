@@ -58,6 +58,7 @@ public struct CardCarouselView<BackContent: View>: View {
                             isFlipped: slot.item.cardType == .regular
                                 && state.isFlipped(at: slot.realIndex),
                             isCentered: isCentered,
+                            cardSize: CGSize(width: layout.cardWidth, height: layout.cardHeight),
                             onTap: { handleCardTap(slot) },
                             onPhotoIndexChanged: { photoIndex in
                                 state.currentPhotoIndex = photoIndex
@@ -71,13 +72,8 @@ public struct CardCarouselView<BackContent: View>: View {
                             backContent: { backContent(slot.item) }
                         )
                         .frame(width: layout.cardWidth, height: layout.cardHeight)
-                        .shadow(
-                            color: isCentered ? .black.opacity(0.18) : .clear,
-                            radius: 16, x: 0, y: 8
-                        )
                         .opacity(isCentered ? 1.0 : 0.6)
-                        .scaleEffect(isCentered ? 1.0 : 0.88)
-                        .offset(y: isCentered ? 0 : 8)
+                        .scaleEffect(isCentered ? 1.0 : 0.97)
                         .zIndex(isCentered ? 1 : 0)
                         .background(
                             GeometryReader { proxy in
@@ -88,7 +84,7 @@ public struct CardCarouselView<BackContent: View>: View {
                                     )
                             }
                         )
-                        .animation(.easeInOut(duration: 0.25), value: scrolledID)
+                        .animation(.easeInOut(duration: 0.5), value: isCentered)
                         .id(slot.id)
                     }
                 }
@@ -188,7 +184,9 @@ public struct CardCarouselView<BackContent: View>: View {
         case .special:
             dataSource?.carouselDidTapSpecialCard(slot.item)
         case .regular:
-            state.toggleFlip(at: slot.realIndex)
+            withAnimation(.spring(duration: 0.6, bounce: 0.15)) {
+                state.toggleFlip(at: slot.realIndex)
+            }
         }
     }
 }

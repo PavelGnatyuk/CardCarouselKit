@@ -13,49 +13,59 @@ import SwiftUI
 /// The back face is provided by `backContent` — defaults to `CardBackView`.
 /// Tap triggers `onTap` — the host decides whether to flip or handle differently.
 ///
-/// The container applies a single clipShape, material background, and shadow.
-/// `.compositingGroup()` ensures the shadow composites correctly and prevents
-/// artifacts when used with `.scrollClipDisabled()`.
+/// Card dimensions are passed explicitly as `cardSize` — never computed from
+/// GeometryReader — so the photo frame is fixed and cannot fluctuate during
+/// scaleEffect animation.
 struct CardView<BackContent: View>: View {
     let item: CardItem
     let isFlipped: Bool
     let isCentered: Bool
+    let cardSize: CGSize
     let onTap: () -> Void
     var onPhotoIndexChanged: ((Int) -> Void)?
     var onPhotoDoubleTap: (() -> Void)?
     @ViewBuilder let backContent: () -> BackContent
 
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                CardFrontView(
-                    item: item,
-                    onPhotoIndexChanged: isCentered ? onPhotoIndexChanged : nil,
-                    onPhotoDoubleTap: isCentered ? onPhotoDoubleTap : nil
-                )
-                .frame(width: geometry.size.width, height: geometry.size.height)
-                .opacity(isFlipped ? 0 : 1)
-                .allowsHitTesting(!isFlipped)
+        ZStack {
+            CardFrontView(
+                item: item,
+                cardSize: cardSize,
+                onPhotoIndexChanged: isCentered ? onPhotoIndexChanged : nil,
+                onPhotoDoubleTap: isCentered ? onPhotoDoubleTap : nil
+            )
+            .frame(width: cardSize.width, height: cardSize.height)
+            .opacity(isFlipped ? 0 : 1)
+            .allowsHitTesting(!isFlipped)
+            .rotation3DEffect(
+                .degrees(isFlipped ? 180 : 0),
+                axis: (x: 0, y: 1, z: 0),
+                perspective: 0.5
+            )
+            // DIAGNOSTIC — remove after confirming frame stability
+            .background(
+                GeometryReader { geo in
+                    Color.clear.onAppear {
+                        print("PHOTO FRAME: \(geo.size.width) x \(geo.size.height) | isCentered: \(isCentered)")
+                    }
+                    .onChange(of: geo.size) { _, newSize in
+                        print("PHOTO FRAME CHANGED TO: \(newSize.width) x \(newSize.height) | isCentered: \(isCentered)")
+                    }
+                }
+            )
+
+            backContent()
+                .frame(width: cardSize.width, height: cardSize.height)
+                .opacity(isFlipped ? 1 : 0)
+                .allowsHitTesting(isFlipped)
                 .rotation3DEffect(
-                    .degrees(isFlipped ? 180 : 0),
+                    .degrees(isFlipped ? 0 : -180),
                     axis: (x: 0, y: 1, z: 0),
                     perspective: 0.5
                 )
-
-                backContent()
-                    .frame(width: geometry.size.width, height: geometry.size.height)
-                    .opacity(isFlipped ? 1 : 0)
-                    .allowsHitTesting(isFlipped)
-                    .rotation3DEffect(
-                        .degrees(isFlipped ? 0 : -180),
-                        axis: (x: 0, y: 1, z: 0),
-                        perspective: 0.5
-                    )
-            }
-            .background(.regularMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
-        .animation(.spring(duration: 0.6, bounce: 0.15), value: isFlipped)
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .onTapGesture {
             onTap()
         }

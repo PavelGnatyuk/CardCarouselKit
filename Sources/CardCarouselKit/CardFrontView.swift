@@ -16,6 +16,7 @@ import SwiftUI
 /// Parent view controls dimensions — this view fills its proposed size.
 struct CardFrontView: View {
     let item: CardItem
+    let cardSize: CGSize
     var onPhotoIndexChanged: ((Int) -> Void)?
     var onPhotoDoubleTap: (() -> Void)?
 
@@ -44,7 +45,7 @@ struct CardFrontView: View {
     private var photoArea: some View {
         Group {
             if let photo = currentPhoto {
-                AsyncCardImageView(photo: photo)
+                AsyncCardImageView(photo: photo, cardSize: cardSize)
                     .id(photo.id)
                     .transition(.identity)
             } else {

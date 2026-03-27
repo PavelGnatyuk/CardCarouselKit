@@ -20,11 +20,13 @@ private nonisolated(unsafe) let imageCache = NSCache<NSString, UIImage>()
 /// no placeholder flash, no delayed resize.
 struct AsyncCardImageView: View {
     let photo: CardPhoto
+    let cardSize: CGSize
 
     @State private var image: UIImage?
 
-    init(photo: CardPhoto) {
+    init(photo: CardPhoto, cardSize: CGSize) {
         self.photo = photo
+        self.cardSize = cardSize
         let key = photo.id.uuidString as NSString
         _image = State(initialValue: imageCache.object(forKey: key))
     }
@@ -35,6 +37,8 @@ struct AsyncCardImageView: View {
                 Image(uiImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
+                    .frame(width: cardSize.width, height: cardSize.height)
+                    .clipped()
                     .transition(.identity)
             } else {
                 RoundedRectangle(cornerRadius: 12)
