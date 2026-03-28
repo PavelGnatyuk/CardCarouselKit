@@ -1,6 +1,2 @@
-import Testing
-@testable import CardCarouselKit
-
-@Test func example() async throws {
-    // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-}
+// Created by Pavel Gnatyuk
+// Test suites are in dedicated files per type.
