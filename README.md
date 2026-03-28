@@ -2,6 +2,15 @@
 
 A domain-agnostic, endless-loop card carousel for SwiftUI. Horizontal paging with tap-to-flip animation, multi-photo navigation, and responsive layout across all iOS device configurations.
 
+<p align="center">
+  <img src="screen1.png" alt="Card carousel front face" width="250" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="screen2.png" alt="Card flip animation" width="250" />
+</p>
+<p align="center">
+  <img src="screen3.png" alt="Card back face with details" width="520" />
+</p>
+
 ## Requirements
 
 - iOS 26+
