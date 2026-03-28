@@ -59,3 +59,20 @@ struct AsyncCardImageView: View {
         }
     }
 }
+
+// MARK: - Preview
+
+#Preview("Async Image") {
+    let image = previewSolidColorImage(color: .systemIndigo)
+    let photo = CardPhoto(
+        cardSizeImageProvider: { image },
+        originalImageProvider: { image }
+    )
+
+    AsyncCardImageView(
+        photo: photo,
+        cardSize: CGSize(width: 260, height: 360)
+    )
+    .frame(width: 260, height: 360)
+    .clipShape(RoundedRectangle(cornerRadius: 20))
+}

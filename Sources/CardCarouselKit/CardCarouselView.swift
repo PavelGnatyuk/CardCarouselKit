@@ -222,38 +222,3 @@ extension CardCarouselView where BackContent == CardBackView {
         items: []
     )
 }
-
-/// Creates test CardItems with solid-color images for previews.
-private func previewCardItems() -> [CardItem] {
-    let colors: [(UIColor, String, String)] = [
-        (.systemRed, "Château Margaux 2015", "Bordeaux, France"),
-        (.systemGreen, "Sauvignon Blanc", "Marlborough, NZ"),
-        (.systemPurple, "Barolo Riserva", "Piedmont, Italy"),
-    ]
-
-    return colors.map { color, title, subtitle in
-        let image = solidColorImage(color: color)
-        return CardItem(
-            photos: [
-                CardPhoto(
-                    cardSizeImageProvider: { image },
-                    originalImageProvider: { image }
-                )
-            ],
-            title: title,
-            subtitle: subtitle,
-            descriptionMarkdown: "",
-            cardType: .regular
-        )
-    }
-}
-
-/// Creates a 300×400 solid-color UIImage for preview use.
-private func solidColorImage(color: UIColor) -> UIImage {
-    let size = CGSize(width: 300, height: 400)
-    let renderer = UIGraphicsImageRenderer(size: size)
-    return renderer.image { context in
-        color.setFill()
-        context.fill(CGRect(origin: .zero, size: size))
-    }
-}

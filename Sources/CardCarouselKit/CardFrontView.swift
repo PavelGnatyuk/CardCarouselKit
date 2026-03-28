@@ -75,7 +75,12 @@ struct CardFrontView: View {
     private func arrowButton(direction: ArrowDirection) -> some View {
         let isEnabled = direction == .left ? currentPhotoIndex > 0 : currentPhotoIndex < item.photos.count - 1
 
-        return Button {
+        return Button(
+            direction == .left
+                ? String(localized: "Previous photo")
+                : String(localized: "Next photo"),
+            systemImage: direction == .left ? "chevron.left" : "chevron.right"
+        ) {
             withAnimation(.easeInOut(duration: 0.25)) {
                 if direction == .left {
                     currentPhotoIndex = max(0, currentPhotoIndex - 1)
@@ -83,20 +88,15 @@ struct CardFrontView: View {
                     currentPhotoIndex = min(item.photos.count - 1, currentPhotoIndex + 1)
                 }
             }
-        } label: {
-            Image(systemName: direction == .left ? "chevron.left" : "chevron.right")
-                .font(.title3.weight(.semibold))
-                .foregroundStyle(.white)
-                .frame(width: 36, height: 36)
-                .background(.black.opacity(0.35), in: Circle())
         }
+        .labelStyle(.iconOnly)
+        .font(.title3.weight(.semibold))
+        .foregroundStyle(.white)
+        .frame(width: 36, height: 36)
+        .background(.black.opacity(0.35), in: Circle())
         .buttonStyle(.plain)
         .opacity(isEnabled ? 1.0 : 0.3)
         .disabled(!isEnabled)
-        .accessibilityLabel(direction == .left
-            ? String(localized: "Previous photo")
-            : String(localized: "Next photo")
-        )
     }
 
     // MARK: - Photo Counter
@@ -127,4 +127,24 @@ struct CardFrontView: View {
     private enum ArrowDirection {
         case left, right
     }
+}
+
+// MARK: - Preview
+
+#Preview("Front — Single Photo") {
+    CardFrontView(
+        item: previewCardItem(color: .systemRed, title: "Single", subtitle: "One photo"),
+        cardSize: CGSize(width: 260, height: 360)
+    )
+    .frame(width: 260, height: 360)
+    .clipShape(RoundedRectangle(cornerRadius: 20))
+}
+
+#Preview("Front — Multi Photo") {
+    CardFrontView(
+        item: previewMultiPhotoCardItem(),
+        cardSize: CGSize(width: 260, height: 360)
+    )
+    .frame(width: 260, height: 360)
+    .clipShape(RoundedRectangle(cornerRadius: 20))
 }

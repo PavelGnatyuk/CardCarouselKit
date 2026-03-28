@@ -59,3 +59,43 @@ struct CardView<BackContent: View>: View {
         }
     }
 }
+
+// MARK: - Preview
+
+#Preview("Card — Front Face") {
+    CardView(
+        item: previewCardItem(color: .systemRed, title: "Front", subtitle: "Tap to flip"),
+        isFlipped: false,
+        isCentered: true,
+        cardSize: CGSize(width: 260, height: 360),
+        onTap: {},
+        backContent: { CardBackView(item: previewCardItem(color: .systemRed, title: "Front", subtitle: "Tap to flip")) }
+    )
+    .frame(width: 260, height: 360)
+    .padding()
+}
+
+#Preview("Card — Back Face") {
+    CardView(
+        item: previewCardItem(
+            color: .systemBlue,
+            title: "Flipped",
+            subtitle: "Back side",
+            descriptionMarkdown: "**Sample** markdown content with *formatting*."
+        ),
+        isFlipped: true,
+        isCentered: true,
+        cardSize: CGSize(width: 260, height: 360),
+        onTap: {},
+        backContent: {
+            CardBackView(item: previewCardItem(
+                color: .systemBlue,
+                title: "Flipped",
+                subtitle: "Back side",
+                descriptionMarkdown: "**Sample** markdown content with *formatting*."
+            ))
+        }
+    )
+    .frame(width: 260, height: 360)
+    .padding()
+}

@@ -58,7 +58,7 @@ public struct CardBackView: View {
     private var emptyState: some View {
         VStack(spacing: 16) {
             Image(systemName: "pencil.line")
-                .font(.system(size: 44, weight: .light))
+                .font(.system(.largeTitle, weight: .light))
                 .foregroundColor(.gray)
 
             Text(String(localized: "Tap edit to add a description"))
@@ -69,4 +69,39 @@ public struct CardBackView: View {
         .padding(.horizontal, 24)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+}
+
+// MARK: - Preview
+
+#Preview("Back — Markdown") {
+    CardBackView(
+        item: previewCardItem(
+            color: .systemBlue,
+            title: "Sample",
+            subtitle: "Preview",
+            descriptionMarkdown: """
+            **Bold text** and *italic text*.
+
+            A second paragraph with a [link](https://example.com).
+
+            - Item one
+            - Item two
+            - Item three
+            """
+        )
+    )
+    .frame(width: 260, height: 360)
+    .padding()
+}
+
+#Preview("Back — Empty") {
+    CardBackView(
+        item: previewCardItem(
+            color: .systemGray,
+            title: "Empty",
+            subtitle: "No description"
+        )
+    )
+    .frame(width: 260, height: 360)
+    .padding()
 }
