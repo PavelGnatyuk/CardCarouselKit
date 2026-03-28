@@ -132,7 +132,7 @@ Neighboring cards peek in the margins. Swipe snaps one card at a time.
 
 ### Endless Loop
 
-For 2+ items, the carousel builds a virtual slot array: `[last 2 items] + [all items] + [first 2 items]`. When the scroll enters a buffer zone, it repositions instantly (no animation) to the matching real slot, creating a seamless infinite loop. Single-item carousels are non-looping.
+For 2+ items, the carousel builds a virtual slot array: `[last 3 items] + [all items] + [first 3 items]`. The buffer size is capped at the item count, so 2-item carousels use a buffer of 2. When the scroll enters a buffer zone, it repositions instantly to the matching real slot, creating a seamless infinite loop. Single-item carousels are non-looping.
 
 ### Image Caching
 

@@ -34,12 +34,13 @@ struct CardCarouselLoopBuildTests {
         #expect(slots[0].item.id == items[0].id)
     }
 
-    /// Description: Verifies that two items produce the correct looping structure with buffers.
+    /// Description: Verifies that two items produce the correct looping structure.
+    /// Effective buffer is min(3, 2) = 2 for two items.
     ///
     /// Scenario:
     /// 1. Create two CardItems
     /// 2. Call build
-    /// 3. Verify total count is 2 + 2 (leading buffer) + 2 (trailing buffer) = 6
+    /// 3. Verify total count is 2 + 2 (leading) + 2 (trailing) = 6
     /// 4. Verify leading buffer contains the last 2 real items
     /// 5. Verify trailing buffer contains the first 2 real items
     @Test
@@ -47,6 +48,7 @@ struct CardCarouselLoopBuildTests {
         let items = makeCardItems(count: 2)
         let slots = CardCarouselLoop.build(from: items)
 
+        // Effective buffer = min(3, 2) = 2
         // [last2] + [all2] + [first2] = 6
         #expect(slots.count == 6)
 
@@ -64,33 +66,36 @@ struct CardCarouselLoopBuildTests {
     }
 
     /// Description: Verifies correct slot structure for a typical 5-item carousel.
+    /// Buffer size is 3 for 5 items.
     ///
     /// Scenario:
     /// 1. Create 5 CardItems
     /// 2. Call build
-    /// 3. Verify total count is 5 + 2 + 2 = 9
-    /// 4. Verify leading buffer has realIndices [3, 4]
+    /// 3. Verify total count is 3 + 5 + 3 = 11
+    /// 4. Verify leading buffer has realIndices [2, 3, 4]
     /// 5. Verify real section has realIndices [0, 1, 2, 3, 4]
-    /// 6. Verify trailing buffer has realIndices [0, 1]
+    /// 6. Verify trailing buffer has realIndices [0, 1, 2]
     @Test
     func buildFromFiveItems() {
         let items = makeCardItems(count: 5)
         let slots = CardCarouselLoop.build(from: items)
 
-        #expect(slots.count == 9)
+        #expect(slots.count == 11)
 
-        // Leading buffer: last 2 items
-        #expect(slots[0].realIndex == 3)
-        #expect(slots[1].realIndex == 4)
+        // Leading buffer: last 3 items
+        #expect(slots[0].realIndex == 2)
+        #expect(slots[1].realIndex == 3)
+        #expect(slots[2].realIndex == 4)
 
         // Real items: indices 0..4
         for i in 0..<5 {
-            #expect(slots[2 + i].realIndex == i)
+            #expect(slots[3 + i].realIndex == i)
         }
 
-        // Trailing buffer: first 2 items
-        #expect(slots[7].realIndex == 0)
-        #expect(slots[8].realIndex == 1)
+        // Trailing buffer: first 3 items
+        #expect(slots[8].realIndex == 0)
+        #expect(slots[9].realIndex == 1)
+        #expect(slots[10].realIndex == 2)
     }
 
     /// Description: Verifies that each slot gets a unique UUID even when mapping to the same real item.
@@ -129,71 +134,90 @@ struct CardCarouselLoopBuildTests {
 @Suite("CardCarouselLoop -- Buffer Detection", .tags(.pureLogic))
 struct CardCarouselLoopBufferTests {
 
-    /// Description: Verifies that firstRealIndex equals the buffer size.
+    /// Description: Verifies effectiveBuffer caps at item count.
     ///
     /// Scenario:
-    /// 1. Read firstRealIndex
-    /// 2. Verify it equals bufferSize (2)
+    /// 1. Verify effective buffer for 2 items is 2 (capped)
+    /// 2. Verify effective buffer for 5 items is 3 (full buffer)
     @Test
-    func firstRealIndex() {
-        #expect(CardCarouselLoop.firstRealIndex == CardCarouselLoop.bufferSize)
-        #expect(CardCarouselLoop.firstRealIndex == 2)
+    func effectiveBufferCapsAtItemCount() {
+        #expect(CardCarouselLoop.effectiveBuffer(for: 2) == 2)
+        #expect(CardCarouselLoop.effectiveBuffer(for: 3) == 3)
+        #expect(CardCarouselLoop.effectiveBuffer(for: 5) == 3)
     }
 
-    /// Description: Verifies leading buffer detection for indices below bufferSize.
+    /// Description: Verifies firstRealIndex equals the effective buffer.
     ///
     /// Scenario:
-    /// 1. Check indices 0 and 1 are in the leading buffer
-    /// 2. Check index 2 is not in the leading buffer
+    /// 1. Verify firstRealIndex is 3 for 5 items
+    /// 2. Verify firstRealIndex is 2 for 2 items (capped)
+    @Test
+    func firstRealIndex() {
+        #expect(CardCarouselLoop.firstRealIndex(itemCount: 5) == 3)
+        #expect(CardCarouselLoop.firstRealIndex(itemCount: 2) == 2)
+    }
+
+    /// Description: Verifies leading buffer detection for indices below effective buffer.
+    ///
+    /// Scenario:
+    /// 1. For 5 items (buffer=3): indices 0, 1, 2 are in buffer; 3 is not
+    /// 2. For 2 items (buffer=2): indices 0, 1 are in buffer; 2 is not
     @Test
     func isInLeadingBuffer() {
-        #expect(CardCarouselLoop.isInLeadingBuffer(virtualIndex: 0))
-        #expect(CardCarouselLoop.isInLeadingBuffer(virtualIndex: 1))
-        #expect(!CardCarouselLoop.isInLeadingBuffer(virtualIndex: 2))
-        #expect(!CardCarouselLoop.isInLeadingBuffer(virtualIndex: 5))
+        // 5 items → buffer = 3
+        #expect(CardCarouselLoop.isInLeadingBuffer(virtualIndex: 0, itemCount: 5))
+        #expect(CardCarouselLoop.isInLeadingBuffer(virtualIndex: 1, itemCount: 5))
+        #expect(CardCarouselLoop.isInLeadingBuffer(virtualIndex: 2, itemCount: 5))
+        #expect(!CardCarouselLoop.isInLeadingBuffer(virtualIndex: 3, itemCount: 5))
+
+        // 2 items → buffer = 2
+        #expect(CardCarouselLoop.isInLeadingBuffer(virtualIndex: 0, itemCount: 2))
+        #expect(CardCarouselLoop.isInLeadingBuffer(virtualIndex: 1, itemCount: 2))
+        #expect(!CardCarouselLoop.isInLeadingBuffer(virtualIndex: 2, itemCount: 2))
     }
 
     /// Description: Verifies trailing buffer detection for indices past real items.
     ///
     /// Scenario:
-    /// 1. For 5 items, trailing starts at index 7 (bufferSize + itemCount)
-    /// 2. Check index 6 is not trailing
-    /// 3. Check index 7 is trailing
-    /// 4. Check index 8 is trailing
+    /// 1. For 5 items (buffer=3), trailing starts at index 8 (3 + 5)
+    /// 2. Check index 7 is not trailing, index 8 is trailing
     @Test
     func isInTrailingBuffer() {
         let itemCount = 5
-        // Trailing starts at bufferSize + itemCount = 7
-        #expect(!CardCarouselLoop.isInTrailingBuffer(virtualIndex: 6, itemCount: itemCount))
-        #expect(CardCarouselLoop.isInTrailingBuffer(virtualIndex: 7, itemCount: itemCount))
+        // Trailing starts at effectiveBuffer + itemCount = 3 + 5 = 8
+        #expect(!CardCarouselLoop.isInTrailingBuffer(virtualIndex: 7, itemCount: itemCount))
         #expect(CardCarouselLoop.isInTrailingBuffer(virtualIndex: 8, itemCount: itemCount))
+        #expect(CardCarouselLoop.isInTrailingBuffer(virtualIndex: 9, itemCount: itemCount))
+        #expect(CardCarouselLoop.isInTrailingBuffer(virtualIndex: 10, itemCount: itemCount))
     }
 
     /// Description: Verifies matching real slot index for leading buffer positions.
     ///
     /// Scenario:
-    /// 1. For 5 items, leading buffer index 0 maps to real slot for item[3] at virtual index 5
-    /// 2. Leading buffer index 1 maps to real slot for item[4] at virtual index 6
+    /// 1. For 5 items (buffer=3):
+    ///    - Leading index 0 → buffer + (5 - 3 + 0) = 3 + 2 = 5
+    ///    - Leading index 1 → buffer + (5 - 3 + 1) = 3 + 3 = 6
+    ///    - Leading index 2 → buffer + (5 - 3 + 2) = 3 + 4 = 7
     @Test
     func matchingRealSlotIndexForLeadingBuffer() {
         let itemCount = 5
-        // Leading index 0 → bufferSize + (itemCount - bufferSize + 0) = 2 + 3 = 5
         #expect(CardCarouselLoop.matchingRealSlotIndex(virtualIndex: 0, itemCount: itemCount) == 5)
-        // Leading index 1 → bufferSize + (itemCount - bufferSize + 1) = 2 + 4 = 6
         #expect(CardCarouselLoop.matchingRealSlotIndex(virtualIndex: 1, itemCount: itemCount) == 6)
+        #expect(CardCarouselLoop.matchingRealSlotIndex(virtualIndex: 2, itemCount: itemCount) == 7)
     }
 
     /// Description: Verifies matching real slot index for trailing buffer positions.
     ///
     /// Scenario:
-    /// 1. For 5 items, trailing buffer index 7 maps to real slot for item[0] at virtual index 2
-    /// 2. Trailing buffer index 8 maps to real slot for item[1] at virtual index 3
+    /// 1. For 5 items (buffer=3):
+    ///    - Trailing index 8 → buffer + (8 - 3 - 5) = 3 + 0 = 3
+    ///    - Trailing index 9 → buffer + (9 - 3 - 5) = 3 + 1 = 4
+    ///    - Trailing index 10 → buffer + (10 - 3 - 5) = 3 + 2 = 5
     @Test
     func matchingRealSlotIndexForTrailingBuffer() {
         let itemCount = 5
-        // Trailing index 7 → bufferSize + (7 - bufferSize - itemCount) = 2 + 0 = 2
-        #expect(CardCarouselLoop.matchingRealSlotIndex(virtualIndex: 7, itemCount: itemCount) == 2)
-        // Trailing index 8 → bufferSize + (8 - bufferSize - itemCount) = 2 + 1 = 3
         #expect(CardCarouselLoop.matchingRealSlotIndex(virtualIndex: 8, itemCount: itemCount) == 3)
+        #expect(CardCarouselLoop.matchingRealSlotIndex(virtualIndex: 9, itemCount: itemCount) == 4)
+        #expect(CardCarouselLoop.matchingRealSlotIndex(virtualIndex: 10, itemCount: itemCount) == 5)
     }
 }

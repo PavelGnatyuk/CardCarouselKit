@@ -48,7 +48,7 @@ public struct CardCarouselView<BackContent: View>: View {
             )
 
             ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: layout.interCardSpacing) {
+                HStack(spacing: layout.interCardSpacing) {
                     ForEach(slots) { slot in
                         let isCentered = slot.id == scrolledID
                             || (scrolledID == nil && slot.realIndex == 0)
@@ -115,7 +115,7 @@ public struct CardCarouselView<BackContent: View>: View {
         slots = CardCarouselLoop.build(from: items)
         guard !slots.isEmpty else { return }
 
-        let initialIndex = items.count >= 2 ? CardCarouselLoop.firstRealIndex : 0
+        let initialIndex = items.count >= 2 ? CardCarouselLoop.firstRealIndex(itemCount: items.count) : 0
         scrolledID = slots[initialIndex].id
         state.centeredCard = slots[initialIndex].item
         state.currentCardIndex = slots[initialIndex].realIndex
@@ -143,7 +143,7 @@ public struct CardCarouselView<BackContent: View>: View {
         // Check if we're in a buffer zone and need to reposition
         if items.count >= 2 {
             let needsReposition: Bool
-            if CardCarouselLoop.isInLeadingBuffer(virtualIndex: virtualIndex) {
+            if CardCarouselLoop.isInLeadingBuffer(virtualIndex: virtualIndex, itemCount: items.count) {
                 needsReposition = true
             } else if CardCarouselLoop.isInTrailingBuffer(virtualIndex: virtualIndex, itemCount: items.count) {
                 needsReposition = true
@@ -159,10 +159,14 @@ public struct CardCarouselView<BackContent: View>: View {
                 // Update state immediately so title shows correct card
                 state.currentCardIndex = slot.realIndex
                 state.centeredCard = slot.item
-                // Delay repositioning so the buffer card fully settles,
-                // then jump instantly (no animation) to the matching real slot
+                // Yield one frame so the scroll gesture fully settles,
+                // then jump scroll position instantly to the matching real slot.
+                // The HStack keeps all views loaded, so the real slot's card
+                // is already rendered at 0.6 opacity — the .animation modifier
+                // smoothly transitions it to 1.0 like a normal scroll.
                 isRepositioning = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                Task {
+                    await Task.yield()
                     withAnimation(.none) {
                         scrolledID = slots[targetIndex].id
                     }
