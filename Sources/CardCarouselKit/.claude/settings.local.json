@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xcodebuild -scheme CardCarouselKit -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build)",
+      "Bash(xcodebuild -scheme CardCarouselKit -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build-for-testing)",
+      "Bash(xcodebuild -scheme CardCarouselKit -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test)"
+    ]
+  }
+}
