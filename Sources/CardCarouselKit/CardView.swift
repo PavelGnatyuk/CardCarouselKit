@@ -52,7 +52,6 @@ struct CardView<BackContent: View>: View {
                     perspective: 0.5
                 )
         }
-        .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .onTapGesture {
             onTap()
