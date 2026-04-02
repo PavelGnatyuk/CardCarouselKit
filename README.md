@@ -85,9 +85,6 @@ Conform to `CardCarouselDataSource` to receive carousel events:
 class MyDataSource: CardCarouselDataSource {
     func carouselDidTapSpecialCard(_ card: CardItem) { ... }
     func carouselDidTapPhoto(card: CardItem, photoIndex: Int) { ... }
-    func carouselWindowDidShift(visibleIndices: Range<Int>) { ... }
-    func carouselDidRequestNextCard(after index: Int) async -> CardItem? { ... }
-    func carouselDidRequestPreviousCard(before index: Int) async -> CardItem? { ... }
 }
 ```
 

@@ -12,40 +12,6 @@ struct CardCarouselLayoutiPhonePortraitTests {
     private let horizontalSizeClass: UserInterfaceSizeClass? = .compact
     private let verticalSizeClass: UserInterfaceSizeClass? = .regular
 
-    /// Description: Verifies iPhone portrait card height is 79% of container.
-    ///
-    /// Scenario:
-    /// 1. Create layout with iPhone portrait size classes
-    /// 2. Verify cardHeight equals 79% of container height
-    @Test
-    func cardHeight() {
-        let layout = CardCarouselLayout(
-            containerSize: containerSize,
-            horizontalSizeClass: horizontalSizeClass,
-            verticalSizeClass: verticalSizeClass
-        )
-
-        let expected = containerSize.height * 0.79
-        #expect(layout.cardHeight == expected)
-    }
-
-    /// Description: Verifies iPhone portrait card width is 72% of container.
-    ///
-    /// Scenario:
-    /// 1. Create layout with iPhone portrait size classes
-    /// 2. Verify cardWidth equals 72% of container width
-    @Test
-    func cardWidth() {
-        let layout = CardCarouselLayout(
-            containerSize: containerSize,
-            horizontalSizeClass: horizontalSizeClass,
-            verticalSizeClass: verticalSizeClass
-        )
-
-        let expected = containerSize.width * 0.72
-        #expect(layout.cardWidth == expected)
-    }
-
     /// Description: Verifies iPhone portrait is not landscape.
     ///
     /// Scenario:

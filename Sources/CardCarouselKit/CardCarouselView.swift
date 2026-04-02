@@ -102,7 +102,7 @@ public struct CardCarouselView<BackContent: View>: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .contentShape(Rectangle())
-        .onChange(of: items.count) { _, _ in
+        .onChange(of: items.map(\.id)) { _, _ in
             rebuildSlots()
         }
         .onChange(of: scrolledID) { _, newID in
@@ -136,6 +136,7 @@ public struct CardCarouselView<BackContent: View>: View {
 
         scrolledID = slots[resolvedIndex].id
         state.centeredCard = slots[resolvedIndex].item
+        state.currentPhotoIndex = 0
         state.currentCardIndex = slots[resolvedIndex].realIndex
     }
 
@@ -150,6 +151,7 @@ public struct CardCarouselView<BackContent: View>: View {
             if let slot = slots.first(where: { $0.id == newID }) {
                 state.currentCardIndex = slot.realIndex
                 state.centeredCard = slot.item
+                state.currentPhotoIndex = 0
                 state.resetFlipsOutsideWindow(center: slot.realIndex)
             }
             return
@@ -177,6 +179,7 @@ public struct CardCarouselView<BackContent: View>: View {
                 // Update state immediately so title shows correct card
                 state.currentCardIndex = slot.realIndex
                 state.centeredCard = slot.item
+                state.currentPhotoIndex = 0
                 // Yield one frame so the scroll gesture fully settles,
                 // then jump scroll position instantly to the matching real slot.
                 // The HStack keeps all views loaded, so the real slot's card
@@ -196,6 +199,7 @@ public struct CardCarouselView<BackContent: View>: View {
         // Normal scroll — update state
         state.currentCardIndex = slot.realIndex
         state.centeredCard = slot.item
+        state.currentPhotoIndex = 0
         state.resetFlipsOutsideWindow(center: slot.realIndex)
     }
 
