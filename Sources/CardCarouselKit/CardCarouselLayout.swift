@@ -78,7 +78,7 @@ struct CardCarouselLayout {
         } else {
             // iPhone Portrait — height-driven, 79% of available height
             self.cardHeight = containerSize.height * 0.79
-            self.cardWidth = containerSize.width * 0.72
+            self.cardWidth = containerSize.width * 0.75
             self.interCardSpacing = 12
         }
 
