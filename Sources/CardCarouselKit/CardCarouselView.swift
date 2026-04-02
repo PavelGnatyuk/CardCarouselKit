@@ -115,10 +115,24 @@ public struct CardCarouselView<BackContent: View>: View {
         slots = CardCarouselLoop.build(from: items)
         guard !slots.isEmpty else { return }
 
-        let initialIndex = items.count >= 2 ? CardCarouselLoop.firstRealIndex(itemCount: items.count) : 0
-        scrolledID = slots[initialIndex].id
-        state.centeredCard = slots[initialIndex].item
-        state.currentCardIndex = slots[initialIndex].realIndex
+        // Resolve target: explicit request > preserve current > first card
+        let targetID = state.pendingScrollTarget ?? state.centeredCard?.id
+        state.pendingScrollTarget = nil
+
+        let realStart = items.count >= 2 ? CardCarouselLoop.firstRealIndex(itemCount: items.count) : 0
+        let realEnd = realStart + items.count
+
+        let resolvedIndex: Int
+        if let targetID,
+           let match = (realStart..<realEnd).first(where: { slots[$0].item.id == targetID }) {
+            resolvedIndex = match
+        } else {
+            resolvedIndex = realStart
+        }
+
+        scrolledID = slots[resolvedIndex].id
+        state.centeredCard = slots[resolvedIndex].item
+        state.currentCardIndex = slots[resolvedIndex].realIndex
     }
 
     // MARK: - Scroll Handling

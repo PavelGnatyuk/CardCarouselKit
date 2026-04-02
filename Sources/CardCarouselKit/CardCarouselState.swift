@@ -16,6 +16,11 @@ public final class CardCarouselState {
     public var isShimmerActive: Bool = false
     public var centeredCard: CardItem?
 
+    /// Set by the host app before a data reload to request the carousel
+    /// center on the item with this ID after slots are rebuilt.
+    /// Consumed and cleared by CardCarouselView during rebuildSlots().
+    public var pendingScrollTarget: UUID?
+
     /// Set by the host app to fade the carousel title during zoom transitions.
     public var isZoomTransitionActive: Bool = false
 
