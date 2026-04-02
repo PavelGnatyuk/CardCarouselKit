@@ -18,6 +18,7 @@ public struct CardCarouselView<BackContent: View>: View {
     let state: CardCarouselState
     let dataSource: (any CardCarouselDataSource)?
     let items: [CardItem]
+    let configuration: CardCarouselConfiguration
     @ViewBuilder let backContent: @MainActor (CardItem) -> BackContent
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -31,11 +32,13 @@ public struct CardCarouselView<BackContent: View>: View {
         state: CardCarouselState,
         dataSource: (any CardCarouselDataSource)? = nil,
         items: [CardItem] = [],
+        configuration: CardCarouselConfiguration = .default,
         @ViewBuilder backContent: @escaping @MainActor (CardItem) -> BackContent
     ) {
         self.state = state
         self.dataSource = dataSource
         self.items = items
+        self.configuration = configuration
         self.backContent = backContent
     }
 
@@ -44,7 +47,8 @@ public struct CardCarouselView<BackContent: View>: View {
             let layout = CardCarouselLayout(
                 containerSize: geometry.size,
                 horizontalSizeClass: horizontalSizeClass,
-                verticalSizeClass: verticalSizeClass
+                verticalSizeClass: verticalSizeClass,
+                configuration: configuration
             )
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -72,8 +76,8 @@ public struct CardCarouselView<BackContent: View>: View {
                             backContent: { backContent(slot.item) }
                         )
                         .frame(width: layout.cardWidth, height: layout.cardHeight)
-                        .opacity(isCentered ? 1.0 : 0.6)
-                        .scaleEffect(isCentered ? 1.0 : (layout.isLandscape ? 1.0 : 0.97), anchor: .bottom)
+                        .opacity(isCentered ? 1.0 : configuration.sideCardOpacity)
+                        .scaleEffect(isCentered ? 1.0 : (layout.isLandscape ? 1.0 : configuration.sideCardScale), anchor: .bottom)
                         .zIndex(isCentered ? 1 : 0)
                         .background(
                             GeometryReader { proxy in
@@ -216,11 +220,13 @@ extension CardCarouselView where BackContent == CardBackView {
     public init(
         state: CardCarouselState,
         dataSource: (any CardCarouselDataSource)? = nil,
-        items: [CardItem] = []
+        items: [CardItem] = [],
+        configuration: CardCarouselConfiguration = .default
     ) {
         self.state = state
         self.dataSource = dataSource
         self.items = items
+        self.configuration = configuration
         self.backContent = { item in CardBackView(item: item) }
     }
 }

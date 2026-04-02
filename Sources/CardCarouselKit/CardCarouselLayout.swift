@@ -33,7 +33,8 @@ struct CardCarouselLayout {
     init(
         containerSize: CGSize,
         horizontalSizeClass: UserInterfaceSizeClass?,
-        verticalSizeClass: UserInterfaceSizeClass?
+        verticalSizeClass: UserInterfaceSizeClass?,
+        configuration: CardCarouselConfiguration = .default
     ) {
         let isRegularWidth = horizontalSizeClass == .regular
         let isCompactHeight = verticalSizeClass == .compact
@@ -57,7 +58,7 @@ struct CardCarouselLayout {
                 self.cardWidth = computedWidth
                 self.cardHeight = computedHeight
             }
-            self.interCardSpacing = 12
+            self.interCardSpacing = configuration.interCardSpacing
         } else if isCompactHeight {
             // iPhone Landscape — subtract toolbar space so card never overlaps
             let toolbarHeight: CGFloat = 60
@@ -74,12 +75,12 @@ struct CardCarouselLayout {
                 self.cardWidth = computedWidth
                 self.cardHeight = computedHeight
             }
-            self.interCardSpacing = 12
+            self.interCardSpacing = configuration.interCardSpacing
         } else {
-            // iPhone Portrait — height-driven, 85% of available height
-            self.cardHeight = containerSize.height * 0.85
-            self.cardWidth = containerSize.width * 0.75
-            self.interCardSpacing = 12
+            // iPhone Portrait
+            self.cardHeight = containerSize.height * configuration.phonePortraitHeightFraction
+            self.cardWidth = containerSize.width * configuration.phonePortraitWidthFraction
+            self.interCardSpacing = configuration.interCardSpacing
         }
 
         self.horizontalContentMargin = (containerSize.width - cardWidth) / 2
