@@ -54,8 +54,8 @@ extension View {
     func parallaxTilt(
         pitch: Double,
         roll: Double,
-        maxDegrees: Double = 6,
-        maxOffset: CGFloat = 8
+        maxDegrees: Double = 18,
+        maxOffset: CGFloat = 16
     ) -> some View {
         modifier(ParallaxTiltModifier(
             pitch: pitch,
