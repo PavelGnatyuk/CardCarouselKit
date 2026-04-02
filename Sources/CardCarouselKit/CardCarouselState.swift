@@ -19,11 +19,6 @@ public final class CardCarouselState {
     /// Set by the host app to fade the carousel title during zoom transitions.
     public var isZoomTransitionActive: Bool = false
 
-    /// Device motion values for parallax effect on the centered card photo.
-    /// Set by the host app from CoreMotion. Default 0 = no parallax (opt-in).
-    public var parallaxPitch: Double = 0
-    public var parallaxRoll: Double = 0
-
     // MARK: - Flip State (per carousel position, not per card ID)
 
     private var flippedPositions: Set<Int> = []
