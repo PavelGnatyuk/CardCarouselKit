@@ -15,8 +15,8 @@ import SwiftUI
 /// Layout rules by context:
 /// - iPhone portrait (compact width, regular height): 79% height, 72% width
 /// - iPhone landscape (compact width, compact height): 85% height, 45% max width
-/// - iPad portrait (regular width, regular height): 65% height, 320pt max width
-/// - iPad landscape (regular width, wider than tall): 80% height, 320pt max width
+/// - iPad portrait (regular width, regular height): 65% height, 50% max width
+/// - iPad landscape (regular width, wider than tall): 80% height, 38% max width
 struct CardCarouselLayout {
     let cardHeight: CGFloat
     let cardWidth: CGFloat
@@ -43,7 +43,9 @@ struct CardCarouselLayout {
             // iPad — both portrait and landscape
             let isLandscape = containerSize.width > containerSize.height
             let heightFraction: CGFloat = isLandscape ? 0.80 : 0.65
-            let maxWidth: CGFloat = min(320, containerSize.width * 0.45)
+            let maxWidth: CGFloat = isLandscape
+                ? containerSize.width * 0.38
+                : containerSize.width * 0.50
 
             let computedHeight = containerSize.height * heightFraction
             let computedWidth = computedHeight * 3.0 / 4.0

@@ -196,13 +196,13 @@ struct CardCarouselLayoutiPadTests {
         #expect(layout.cardHeight > 0)
     }
 
-    /// Description: Verifies iPad card width never exceeds 320pt.
+    /// Description: Verifies iPad landscape card width does not exceed 38% of container.
     ///
     /// Scenario:
-    /// 1. Create layout with large iPad container
-    /// 2. Verify cardWidth is at most 320pt
+    /// 1. Create layout with large iPad landscape container
+    /// 2. Verify cardWidth is at most 38% of container width
     @Test
-    func cardWidthCappedAt320() {
+    func cardWidthCappedAtPercentage() {
         let containerSize = CGSize(width: 1180, height: 820)
         let layout = CardCarouselLayout(
             containerSize: containerSize,
@@ -210,7 +210,7 @@ struct CardCarouselLayoutiPadTests {
             verticalSizeClass: .regular
         )
 
-        #expect(layout.cardWidth <= 320)
+        #expect(layout.cardWidth <= containerSize.width * 0.38)
     }
 
     /// Description: Verifies iPad card maintains approximately 3:4 aspect ratio.
