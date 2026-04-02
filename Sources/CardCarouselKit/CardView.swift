@@ -21,6 +21,8 @@ struct CardView<BackContent: View>: View {
     let isFlipped: Bool
     let isCentered: Bool
     let cardSize: CGSize
+    let parallaxPitch: Double
+    let parallaxRoll: Double
     let onTap: () -> Void
     var onPhotoIndexChanged: ((Int) -> Void)?
     var onPhotoDoubleTap: (() -> Void)?
@@ -31,6 +33,8 @@ struct CardView<BackContent: View>: View {
             CardFrontView(
                 item: item,
                 cardSize: cardSize,
+                parallaxPitch: parallaxPitch,
+                parallaxRoll: parallaxRoll,
                 onPhotoIndexChanged: isCentered ? onPhotoIndexChanged : nil,
                 onPhotoDoubleTap: isCentered ? onPhotoDoubleTap : nil
             )
@@ -68,6 +72,8 @@ struct CardView<BackContent: View>: View {
         isFlipped: false,
         isCentered: true,
         cardSize: CGSize(width: 260, height: 360),
+        parallaxPitch: 0,
+        parallaxRoll: 0,
         onTap: {},
         backContent: { CardBackView(item: previewCardItem(color: .systemRed, title: "Front", subtitle: "Tap to flip")) }
     )
@@ -86,6 +92,8 @@ struct CardView<BackContent: View>: View {
         isFlipped: true,
         isCentered: true,
         cardSize: CGSize(width: 260, height: 360),
+        parallaxPitch: 0,
+        parallaxRoll: 0,
         onTap: {},
         backContent: {
             CardBackView(item: previewCardItem(

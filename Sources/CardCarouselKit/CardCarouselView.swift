@@ -59,6 +59,8 @@ public struct CardCarouselView<BackContent: View>: View {
                                 && state.isFlipped(at: slot.realIndex),
                             isCentered: isCentered,
                             cardSize: CGSize(width: layout.cardWidth, height: layout.cardHeight),
+                            parallaxPitch: isCentered ? state.parallaxPitch : 0,
+                            parallaxRoll: isCentered ? state.parallaxRoll : 0,
                             onTap: { handleCardTap(slot) },
                             onPhotoIndexChanged: { photoIndex in
                                 state.currentPhotoIndex = photoIndex

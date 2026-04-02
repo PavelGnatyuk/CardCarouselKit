@@ -17,6 +17,8 @@ import SwiftUI
 struct CardFrontView: View {
     let item: CardItem
     let cardSize: CGSize
+    let parallaxPitch: Double
+    let parallaxRoll: Double
     var onPhotoIndexChanged: ((Int) -> Void)?
     var onPhotoDoubleTap: (() -> Void)?
 
@@ -48,6 +50,7 @@ struct CardFrontView: View {
                 AsyncCardImageView(photo: photo, cardSize: cardSize)
                     .id(photo.id)
                     .transition(.identity)
+                    .parallaxTilt(pitch: parallaxPitch, roll: parallaxRoll)
             } else {
                 Rectangle()
                     .fill(.quaternary)
@@ -134,7 +137,9 @@ struct CardFrontView: View {
 #Preview("Front — Single Photo") {
     CardFrontView(
         item: previewCardItem(color: .systemRed, title: "Single", subtitle: "One photo"),
-        cardSize: CGSize(width: 260, height: 360)
+        cardSize: CGSize(width: 260, height: 360),
+        parallaxPitch: 0,
+        parallaxRoll: 0
     )
     .frame(width: 260, height: 360)
     .clipShape(RoundedRectangle(cornerRadius: 20))
@@ -143,7 +148,9 @@ struct CardFrontView: View {
 #Preview("Front — Multi Photo") {
     CardFrontView(
         item: previewMultiPhotoCardItem(),
-        cardSize: CGSize(width: 260, height: 360)
+        cardSize: CGSize(width: 260, height: 360),
+        parallaxPitch: 0,
+        parallaxRoll: 0
     )
     .frame(width: 260, height: 360)
     .clipShape(RoundedRectangle(cornerRadius: 20))
