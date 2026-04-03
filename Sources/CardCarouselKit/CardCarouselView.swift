@@ -63,15 +63,10 @@ public struct CardCarouselView<BackContent: View>: View {
                                 && state.isFlipped(at: slot.realIndex),
                             isCentered: isCentered,
                             cardSize: CGSize(width: layout.cardWidth, height: layout.cardHeight),
-                            onTap: { handleCardTap(slot) },
+                            onTap: { handleCardSingleTap(slot) },
+                            onDoubleTap: { handleCardDoubleTap(slot) },
                             onPhotoIndexChanged: { photoIndex in
                                 state.currentPhotoIndex = photoIndex
-                            },
-                            onPhotoDoubleTap: {
-                                dataSource?.carouselDidTapPhoto(
-                                    card: slot.item,
-                                    photoIndex: state.currentPhotoIndex
-                                )
                             },
                             backContent: { backContent(slot.item) }
                         )
@@ -205,14 +200,31 @@ public struct CardCarouselView<BackContent: View>: View {
 
     // MARK: - Card Tap
 
-    private func handleCardTap(_ slot: VirtualSlot) {
+    /// Single tap: front face opens full-screen photo, back face flips to front,
+    /// special card triggers the add-wine action.
+    private func handleCardSingleTap(_ slot: VirtualSlot) {
         switch slot.item.cardType {
         case .special:
             dataSource?.carouselDidTapSpecialCard(slot.item)
         case .regular:
-            withAnimation(.spring(duration: 0.6, bounce: 0.15)) {
-                state.toggleFlip(at: slot.realIndex)
+            if state.isFlipped(at: slot.realIndex) {
+                withAnimation(.spring(duration: 0.6, bounce: 0.15)) {
+                    state.toggleFlip(at: slot.realIndex)
+                }
+            } else {
+                dataSource?.carouselDidTapPhoto(
+                    card: slot.item,
+                    photoIndex: state.currentPhotoIndex
+                )
             }
+        }
+    }
+
+    /// Double tap: flips regular cards between front and back.
+    private func handleCardDoubleTap(_ slot: VirtualSlot) {
+        guard slot.item.cardType == .regular else { return }
+        withAnimation(.spring(duration: 0.6, bounce: 0.15)) {
+            state.toggleFlip(at: slot.realIndex)
         }
     }
 }

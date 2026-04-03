@@ -22,8 +22,8 @@ struct CardView<BackContent: View>: View {
     let isCentered: Bool
     let cardSize: CGSize
     let onTap: () -> Void
+    var onDoubleTap: (() -> Void)?
     var onPhotoIndexChanged: ((Int) -> Void)?
-    var onPhotoDoubleTap: (() -> Void)?
     @ViewBuilder let backContent: () -> BackContent
 
     var body: some View {
@@ -31,8 +31,7 @@ struct CardView<BackContent: View>: View {
             CardFrontView(
                 item: item,
                 cardSize: cardSize,
-                onPhotoIndexChanged: isCentered ? onPhotoIndexChanged : nil,
-                onPhotoDoubleTap: isCentered ? onPhotoDoubleTap : nil
+                onPhotoIndexChanged: isCentered ? onPhotoIndexChanged : nil
             )
             .frame(width: cardSize.width, height: cardSize.height)
             .opacity(isFlipped ? 0 : 1)
@@ -53,6 +52,9 @@ struct CardView<BackContent: View>: View {
                 )
         }
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .onTapGesture(count: 2) {
+            onDoubleTap?()
+        }
         .onTapGesture {
             onTap()
         }

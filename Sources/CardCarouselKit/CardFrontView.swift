@@ -18,7 +18,6 @@ struct CardFrontView: View {
     let item: CardItem
     let cardSize: CGSize
     var onPhotoIndexChanged: ((Int) -> Void)?
-    var onPhotoDoubleTap: (() -> Void)?
 
     @State private var currentPhotoIndex: Int = 0
 
@@ -55,9 +54,6 @@ struct CardFrontView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
-        .onTapGesture(count: 2) {
-            onPhotoDoubleTap?()
-        }
     }
 
     // MARK: - Navigation Arrows
